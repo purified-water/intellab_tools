@@ -3,9 +3,23 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { Copy } from 'lucide-react'
 import { Button } from "@/components/ui";
 import { useState } from "react";
+import { toast } from "sonner";
 
 const LessonViewerPage = () => {
     const [inputText, setInputText] = useState<string>('');
+
+    const handleCopy = async () => {
+        if (inputText) {
+            try {
+                await navigator.clipboard.writeText(inputText);
+                toast.success("Copied to clipboard");
+            } catch (err) {
+                console.error("Failed to copy: ", err);
+                toast.error("Failed to copy to clipboard");
+            }
+        }
+    };
+
 
     return (
         <div className="flex flex-col w-full h-[100vh] space-y-2 bg-gray6">
@@ -13,6 +27,7 @@ const LessonViewerPage = () => {
                 <div className="text-2xl text-black font-bold">Lesson markdown viewer</div>
 
                 <Button
+                    onClick={handleCopy}
                     className='cursor-pointer'
                     size="icon"
                     variant="default"
