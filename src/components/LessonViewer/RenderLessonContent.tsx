@@ -63,11 +63,10 @@ const CodeTabs: React.FC<{ codeBlocks: CodeBlock[] }> = ({ codeBlocks }) => {
         {codeBlocks.map((block) => (
           <button
             key={block.language}
-            className={`px-4 py-3 text-sm ${
-              activeTab === block.language
-                ? "bg-white font-semibold border-b-2 border-appPrimary text-appPrimary"
-                : "text-gray2 hover:text-appPrimary hover:bg-gray6"
-            }`}
+            className={`px-4 py-3 text-sm ${activeTab === block.language
+              ? "bg-white font-semibold border-b-2 border-appPrimary text-appPrimary"
+              : "text-gray2 hover:text-appPrimary hover:bg-gray6"
+              }`}
             onClick={() => setActiveTab(block.language)}
           >
             {block.language}
@@ -305,24 +304,25 @@ export const RenderMarkdown: React.FC<{
     // Extract TOC items
     const tocItems = extractTOC(content);
     setTocItems(tocItems);
-  }, [content, setTocItems]);
-
-  return (
+  }, [content, setTocItems]); return (
     <>
-      <div className="lesson-content markdown h-[85vh] overflow-auto" ref={contentRef}>
+      <div className="lesson-content markdown w-full overflow-visible" ref={contentRef}>
         {blocks.map((block, index) => {
-          if (block.type === "text") {            return (              <div key={index} className="mb-4 prose prose-sm md:prose-base lg:prose-lg max-w-none">                <ReactMarkdown 
+          if (block.type === "text") {
+            return (
+              <div key={index} className="mb-4 prose prose-sm md:prose-base lg:prose-lg max-w-none">
+                <ReactMarkdown
                   remarkPlugins={[remarkGfm, remarkMath]}
                   rehypePlugins={[rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }], rehypeKatex]}
                   components={{
-                 
+
                     // Make sure code in text sections doesn't get affected by prose
                     code: (props) => {
                       const { className, children, ...rest } = props;
                       const match = /language-(\w+)/.exec(className || '');
                       const isInline = !match && children;
-                      return isInline ? 
-                        <code className="px-1 py-0.5 bg-gray-100 rounded text-gray-800 font-mono text-sm" {...rest}>{children}</code> : 
+                      return isInline ?
+                        <code className="px-1 py-0.5 bg-gray-100 rounded text-gray-800 font-mono text-sm" {...rest}>{children}</code> :
                         <code {...props} />
                     }
                   }}

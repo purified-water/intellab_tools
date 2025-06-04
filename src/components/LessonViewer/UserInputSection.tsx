@@ -1,14 +1,39 @@
+import { useRef, useEffect } from 'react';
+
 interface UserInputSectionProps {
   setInputText: (text: string) => void;
+  editorRef?: React.MutableRefObject<HTMLTextAreaElement | null>;
+  onScroll?: (scrollTop: number, scrollHeight: number, clientHeight: number) => void;
 }
 
-export const UserInputSection = ({ setInputText }: UserInputSectionProps) => {
-  return (
-    <div className='h-[100%] w-full'>
+export const UserInputSection = ({ setInputText, editorRef, onScroll }: UserInputSectionProps) => {
+  const internalEditorRef = useRef<HTMLTextAreaElement>(null);
+  const actualEditorRef = editorRef || internalEditorRef;
+
+  // Set up scroll event listener
+  useEffect(() => {
+    const editorElement = actualEditorRef.current;
+    
+    if (editorElement && onScroll) {
+      const handleScroll = () => {
+        onScroll(
+          editorElement.scrollTop,
+          editorElement.scrollHeight,
+          editorElement.clientHeight
+        );
+      };
+
+      editorElement.addEventListener('scroll', handleScroll);
+      return () => editorElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [actualEditorRef, onScroll]);  return (
+    <div className='h-full w-full overflow-hidden'>
       <textarea
-        className='bg-white h-full w-full text-black focus:outline-none px-4 py-2 overflow-y-scroll align-text-top'
+        ref={actualEditorRef}
+        className='bg-white h-full w-full text-black focus:outline-none px-4 py-2 overflow-y-auto align-text-top synced-scroll'
         placeholder='Enter your text here'
         onChange={(e) => setInputText(e.target.value)}
+        style={{ resize: 'none' }}
       />
     </div>
   )

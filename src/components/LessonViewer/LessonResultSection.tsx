@@ -1,14 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { RenderMarkdown } from "./RenderLessonContent";
 import { TableOfContents, TOCItem } from "./TableOfContents";
 
 interface LessonResultSectionProps {
   inputText: string;
+  previewRef?: React.MutableRefObject<HTMLDivElement | null>;
+  onScroll?: (scrollTop: number, scrollHeight: number, clientHeight: number) => void;
 }
 
-export const LessonResultSection = ({ inputText }: LessonResultSectionProps) => {
+export const LessonResultSection = ({ inputText, previewRef, onScroll }: LessonResultSectionProps) => {
   const [tocItems, setTocItems] = useState<TOCItem[]>([]);
   const [activeHeading, setActiveHeading] = useState<string | null>(null);
+  const internalPreviewRef = useRef<HTMLDivElement>(null);
+  const actualPreviewRef = previewRef || internalPreviewRef;
 
   // Setup intersection observer for headings
   useEffect(() => {
@@ -41,24 +45,37 @@ export const LessonResultSection = ({ inputText }: LessonResultSectionProps) => 
       observer.disconnect();
     };
   }, [tocItems]);
+  // Add scroll event handler for the preview component
+  useEffect(() => {
+    const previewElement = actualPreviewRef.current;
 
-  const renderContent = () => {
+    if (previewElement && onScroll) {
+      const handleScroll = () => {
+        onScroll(
+          previewElement.scrollTop,
+          previewElement.scrollHeight,
+          previewElement.clientHeight
+        );
+      };
+
+      previewElement.addEventListener('scroll', handleScroll);
+      return () => previewElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [actualPreviewRef, onScroll]); const renderContent = () => {
     return (
-      <div className="pr-4 space-y-6 h-full">
+      <div className="h-full overflow-y-auto overflow-x-hidden synced-scroll pr-4 space-y-6" ref={actualPreviewRef}>
         <RenderMarkdown content={inputText} setTocItems={setTocItems} />
       </div>
     );
-    return null;
   };
-
   return (
     <>
-      <div className="grid grid-cols-1 gap-2 p-6 pl-8 lg:grid-cols-5 h-full">
-        <div className="col-span-1 lg:col-span-4">
+      <div className="grid grid-cols-1 gap-2 p-2 lg:grid-cols-5 h-full overflow-hidden">
+        <div className="col-span-1 lg:col-span-4 h-full overflow-hidden">
           {renderContent()}
         </div>
         <div className="hidden col-span-1 lg:block">
-          <div className="sticky top-5 lg:right-4">
+          <div className="sticky top-5 lg:right-4 max-h-[90%] overflow-y-auto">
             <TableOfContents items={tocItems} activeId={activeHeading} />
           </div>
         </div>
