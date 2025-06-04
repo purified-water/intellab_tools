@@ -7,6 +7,9 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { TOCItem } from "./TableOfContents";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css"; // Import KaTeX CSS
 import ImageCarousel from "./ImageCarousel";
 import { CarouselImage, isImageMarkdown, extractImageInfo } from "@/utils";
 // Type definitions
@@ -308,10 +311,22 @@ export const RenderMarkdown: React.FC<{
     <>
       <div className="lesson-content markdown h-[85vh] overflow-auto" ref={contentRef}>
         {blocks.map((block, index) => {
-          if (block.type === "text") {
-            return (
-              <div key={index} className="mb-4">
-                <ReactMarkdown rehypePlugins={[remarkGfm, rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }]]}>
+          if (block.type === "text") {            return (              <div key={index} className="mb-4 prose prose-sm md:prose-base lg:prose-lg max-w-none">                <ReactMarkdown 
+                  remarkPlugins={[remarkGfm, remarkMath]}
+                  rehypePlugins={[rehypeSlug, [rehypeAutolinkHeadings, { behavior: "wrap" }], rehypeKatex]}
+                  components={{
+                 
+                    // Make sure code in text sections doesn't get affected by prose
+                    code: (props) => {
+                      const { className, children, ...rest } = props;
+                      const match = /language-(\w+)/.exec(className || '');
+                      const isInline = !match && children;
+                      return isInline ? 
+                        <code className="px-1 py-0.5 bg-gray-100 rounded text-gray-800 font-mono text-sm" {...rest}>{children}</code> : 
+                        <code {...props} />
+                    }
+                  }}
+                >
                   {block.content as string}
                 </ReactMarkdown>
               </div>
