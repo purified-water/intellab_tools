@@ -11,7 +11,9 @@ export const isImageMarkdown = (line: string): boolean => {
 
 // Helper function to extract image info from markdown
 export const extractImageInfo = (line: string): CarouselImage[] => {
-  const imageRegex = /!\[(.*?)\]\((.*?)\)/g;
+  // Updated regex to handle URLs with parentheses
+  // This looks for image markdown pattern ![alt](url) where url can contain parentheses
+  const imageRegex = /!\[(.*?)\]\(((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*)\)/g;
   const images: CarouselImage[] = [];
   let match;
 
