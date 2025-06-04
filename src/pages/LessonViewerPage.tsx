@@ -133,11 +133,11 @@ const LessonViewerPage = () => {
                         minSize={10}
                         id="user-input-section"
                         className="bg-white overflow-hidden"
-                    >
-                        <UserInputSection
+                    >                        <UserInputSection
                             setInputText={setInputText}
                             editorRef={editorRef}
                             onScroll={handleEditorScroll}
+                            storageKey="lesson_input_data"
                         />
                     </ResizablePanel>
 
